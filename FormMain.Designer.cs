@@ -36,7 +36,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
             Name = "FormMain";
-            Text = "FormMain";
+            Text = "Server";
             ResumeLayout(false);
         }
 
