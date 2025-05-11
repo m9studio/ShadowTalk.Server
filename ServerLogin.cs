@@ -21,7 +21,7 @@ namespace M9Studio.ShadowTalk.Server
             {
                 PacketClientToServer2FA _2fa;
                 session.Send(new PacketServerToClientRequestOn2FA());
-                string code = (random.Next(900000) + 100000).ToString();//100000 - 999999
+                string code = random.Next(0, 1000000).ToString("D6");
                 //TODO send email code
                 for (int i = 1; i <= 3; i++)
                 {
