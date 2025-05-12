@@ -8,4 +8,16 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="M9Studio.SecureStream" Version="8.0.0.1" />
+    <PackageReference Include="M9Studio.UdpLikeTcp" Version="8.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="M9Studio.ShadowTalk.Core">
+      <HintPath>..\ShadowTalk.Core\bin\Debug\net8.0\M9Studio.ShadowTalk.Core.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

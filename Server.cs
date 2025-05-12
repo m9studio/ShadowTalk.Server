@@ -46,9 +46,6 @@ namespace M9Studio.ShadowTalk.Server
 
 
 
-        protected void Disconect(SecureSession<IPEndPoint> session)
-        {
-            //TODO
-        }
+        protected void Disconect(SecureSession<IPEndPoint> session) => adapter.Disconect(session.RemoteAddress);
     }
 }
