@@ -46,7 +46,6 @@ namespace M9Studio.ShadowTalk.Server
         {
             session.Send(new PacketServerToClientSendMessages());
             session.Send(new PacketServerToClientStatusMessages());
-
         }
         protected void Disconect(SecureSession<IPEndPoint> session) => adapter.Disconect(session.RemoteAddress);
     }

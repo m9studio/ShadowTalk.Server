@@ -79,7 +79,7 @@ namespace M9Studio.ShadowTalk.Server
             // Обновляем базу
             @base.Send("UPDATE user SET salt = ?, verifier = ?, rsa = ? WHERE id = ?", user.Salt, user.Verifier, user.RSA, user.Id);
             //TODO удаляем все сообщения адрессованные user.Id, так как он не сможет их расшифровать
-
+            LoginSuccess(session);
         }
         protected void CheckSRP(SecureSession<IPEndPoint> session, PacketClientToServerReconectSRP srp)
         {
@@ -136,7 +136,7 @@ namespace M9Studio.ShadowTalk.Server
                 if (!expectedHmac.Equals(srp.HMAC, StringComparison.OrdinalIgnoreCase))
                     throw new Exception("Invalid HMAC");
 
-
+                LoginSuccess(session);
             }
             catch (Exception ex)
             {
