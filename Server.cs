@@ -42,10 +42,12 @@ namespace M9Studio.ShadowTalk.Server
             catch (Exception ex) { }
             Disconect(session);
         }
+        protected void LoginSuccess(SecureSession<IPEndPoint> session)
+        {
+            session.Send(new PacketServerToClientSendMessages());
+            session.Send(new PacketServerToClientStatusMessages());
 
-
-
-
+        }
         protected void Disconect(SecureSession<IPEndPoint> session) => adapter.Disconect(session.RemoteAddress);
     }
 }

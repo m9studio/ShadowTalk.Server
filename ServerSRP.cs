@@ -77,6 +77,8 @@ namespace M9Studio.ShadowTalk.Server
 
             // Обновляем базу
             @base.Send("UPDATE user SET salt = ?, verifier = ? WHERE id = ?", user.Salt, user.Verifier, user.Id);
+
+            //TODO удаляем все сообщения адрессованные user.Id, так как он не сможет их расшифровать
         }
         protected void CheckSRP(SecureSession<IPEndPoint> session, PacketClientToServerReconectSRP srp)
         {
