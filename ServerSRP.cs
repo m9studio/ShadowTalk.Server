@@ -74,11 +74,12 @@ namespace M9Studio.ShadowTalk.Server
                 Disconect(session);
                 return;
             }
+            user.RSA = rsp2.RSA;
 
             // Обновляем базу
-            @base.Send("UPDATE user SET salt = ?, verifier = ? WHERE id = ?", user.Salt, user.Verifier, user.Id);
-
+            @base.Send("UPDATE user SET salt = ?, verifier = ?, rsa = ? WHERE id = ?", user.Salt, user.Verifier, user.RSA, user.Id);
             //TODO удаляем все сообщения адрессованные user.Id, так как он не сможет их расшифровать
+
         }
         protected void CheckSRP(SecureSession<IPEndPoint> session, PacketClientToServerReconectSRP srp)
         {

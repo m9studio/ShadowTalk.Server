@@ -9,5 +9,6 @@
         public string Salt;
         public string Verifier;
         public bool Is2FA;
+        public string RSA;
     }
 }
