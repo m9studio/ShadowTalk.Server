@@ -59,7 +59,7 @@ namespace M9Studio.ShadowTalk.Server
             }
             catch (Exception ex)
             {
-                Disconect(session);
+                Disconnect(session);
                 return;
             }
 
@@ -72,7 +72,7 @@ namespace M9Studio.ShadowTalk.Server
             string M1_expected = SRPHelper.ComputeM1(A, B, K);
             if (rsp2.M1 != M1_expected)
             {
-                Disconect(session);
+                Disconnect(session);
                 return;
             }
             user.RSA = rsp2.RSA;
@@ -151,7 +151,7 @@ namespace M9Studio.ShadowTalk.Server
             {
                 //Console.WriteLine($"[Reconnect Fail] {ex.Message}");
                 session.Send(new PacketServerToClientLoginError());
-                Disconect(session);
+                Disconnect(session);
             }
         }
     }

@@ -13,7 +13,7 @@ namespace M9Studio.ShadowTalk.Server
             if(users.Count == 0)
             {
                 session.Send(new PacketServerToClientLoginError());
-                Disconect(session);
+                Disconnect(session);
                 return;
             }
             User user = users[0];
@@ -21,7 +21,7 @@ namespace M9Studio.ShadowTalk.Server
             if (sessions.ContainsKey(user.Id))
             {
                 session.Send(new PacketServerToClientLoginError());
-                Disconect(session);
+                Disconnect(session);
                 return;
             }
 
@@ -53,7 +53,7 @@ namespace M9Studio.ShadowTalk.Server
                         else
                         {
                             session.Send(new PacketServerToClientLoginError());
-                            Disconect(session);
+                            Disconnect(session);
                             return;
                         }
                     }

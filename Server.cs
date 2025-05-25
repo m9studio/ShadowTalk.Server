@@ -41,7 +41,8 @@ namespace M9Studio.ShadowTalk.Server
             users = new Dictionary<int, User>();
 
 
-            manager.OnSecureSessionEstablished += Connect;
+            manager.OnConnected += Connect;
+            manager.OnDisconnected += Disconnect;
         }
         private void Connect(SecureSession<IPEndPoint> session)
         {
@@ -60,9 +61,9 @@ namespace M9Studio.ShadowTalk.Server
                 return;
             }
             catch (Exception ex) { }
-            Disconect(session);
+            Disconnect(session);
         }
-        protected void Disconect(SecureSession<IPEndPoint> session)
+        protected void Disconnect(SecureSession<IPEndPoint> session)
         {
             if (addresses.ContainsKey(session))
             {
