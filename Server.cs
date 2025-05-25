@@ -12,14 +12,22 @@ namespace M9Studio.ShadowTalk.Server
         Socket socket;
         TcpServerSecureTransportAdapter adapter;
         SecureChannelManager<IPEndPoint> manager;
+
+        private Dictionary<int, SecureSession<IPEndPoint>> sessions;
+        private Dictionary<int, User> users;//TODO нужно ли?
+
+
         public Server()
         {
+            @base = new DataBase();
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             socket.Bind(new IPEndPoint(IPAddress.Any, 55555));
             socket.Listen(10);
 
             adapter = new TcpServerSecureTransportAdapter(socket);
             manager = new SecureChannelManager<IPEndPoint>(adapter);
+            sessions = new Dictionary<int, SecureSession<IPEndPoint>>();
+            users = new Dictionary<int, User>();
 
             manager.OnSecureSessionEstablished += Connect;
         }
