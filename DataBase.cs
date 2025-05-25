@@ -10,7 +10,7 @@ namespace M9Studio.ShadowTalk.Server
             string connectionString = "Data Source=localdb.sqlite;Version=3;";
 
             bool isNew = false;
-            if (!System.IO.File.Exists("localdb.sqlite"))
+            if (!File.Exists("localdb.sqlite"))
             {
                 SQLiteConnection.CreateFile("localdb.sqlite");
                 isNew = true;
@@ -32,6 +32,20 @@ namespace M9Studio.ShadowTalk.Server
                         rsa TEXT
                     );";
                 using (var cmd = new SQLiteCommand(createTable, connection))
+                {
+                    cmd.ExecuteNonQuery();
+                }
+
+
+                string createMessagesTable = @"
+                    CREATE TABLE messages (
+                        sender INTEGER,
+                        recipient INTEGER,
+                        uuid TEXT PRIMARY KEY,
+                        text TEXT,
+                        type INTEGER DEFAULT 0
+                    );";
+                using (var cmd = new SQLiteCommand(createMessagesTable, connection))
                 {
                     cmd.ExecuteNonQuery();
                 }
@@ -69,6 +83,36 @@ namespace M9Studio.ShadowTalk.Server
 
             return users;
         }
+        public List<Message> Messages(string request, params object[] param)
+        {
+            var messages = new List<Message>();
+
+            using (var cmd = new SQLiteCommand(request, connection))
+            {
+                foreach (var p in param)
+                {
+                    cmd.Parameters.AddWithValue(null, p);
+                }
+
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        messages.Add(new Message
+                        {
+                            Sender = Convert.ToInt32(reader["sender"]),
+                            Recipient = Convert.ToInt32(reader["recipient"]),
+                            UUID = reader["uuid"]?.ToString(),
+                            Text = reader["text"]?.ToString(),
+                            Type = Convert.ToInt32(reader["type"])
+                        });
+                    }
+                }
+            }
+
+            return messages;
+        }
+
         public void Send(string request, params object[] param)
         {
             using (var cmd = new SQLiteCommand(request, connection))

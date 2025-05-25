@@ -77,9 +77,11 @@ namespace M9Studio.ShadowTalk.Server
             user.RSA = rsp2.RSA;
 
             // Обновляем базу
-            @base.Send("UPDATE user SET salt = ?, verifier = ?, rsa = ? WHERE id = ?", user.Salt, user.Verifier, user.RSA, user.Id);
-            //TODO удаляем все сообщения адрессованные user.Id, так как он не сможет их расшифровать
-            LoginSuccess(session);
+            @base.Send("UPDATE users SET salt = ?, verifier = ?, rsa = ? WHERE id = ?", user.Salt, user.Verifier, user.RSA, user.Id);
+
+            @base.Send("UPDATE messages SET type = ?, text = ? WHERE recipient = ?", (int)PacketServerToClientStatusMessages.CheckType.DELETED, "", user.Id);
+
+            LoginSuccess(session, user);
         }
         protected void CheckSRP(SecureSession<IPEndPoint> session, PacketClientToServerReconectSRP srp)
         {
@@ -103,7 +105,7 @@ namespace M9Studio.ShadowTalk.Server
                     throw new Exception("Token expired");
 
                 // Поиск пользователя
-                List<User> users = @base.Users("SELECT * FROM user WHERE id = ?", userId);
+                List<User> users = @base.Users("SELECT * FROM users WHERE id = ?", userId);
                 if (users.Count == 0)
                     throw new Exception("User not found");
 
@@ -136,7 +138,7 @@ namespace M9Studio.ShadowTalk.Server
                 if (!expectedHmac.Equals(srp.HMAC, StringComparison.OrdinalIgnoreCase))
                     throw new Exception("Invalid HMAC");
 
-                LoginSuccess(session);
+                LoginSuccess(session, user);
             }
             catch (Exception ex)
             {
