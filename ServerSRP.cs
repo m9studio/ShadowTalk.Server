@@ -97,6 +97,9 @@ namespace M9Studio.ShadowTalk.Server
                 if (!int.TryParse(userIdStr, out int userId))
                     throw new Exception("Invalid userId");
 
+                if (sessions.ContainsKey(userId))
+                    throw new Exception("User online");
+
                 if (!long.TryParse(timestampStr, out long tokenTimestamp))
                     throw new Exception("Invalid timestamp");
 

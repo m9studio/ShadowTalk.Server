@@ -3,6 +3,8 @@ using System.Net.Sockets;
 using M9Studio.ShadowTalk.Core;
 using M9Studio.SecureStream;
 using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
+using Microsoft.VisualBasic.ApplicationServices;
 
 namespace M9Studio.ShadowTalk.Server
 {
@@ -13,8 +15,9 @@ namespace M9Studio.ShadowTalk.Server
         TcpServerSecureTransportAdapter adapter;
         SecureChannelManager<IPEndPoint> manager;
 
-        private Dictionary<int, SecureSession<IPEndPoint>> sessions;
-        private Dictionary<int, User> users;//TODO нужно ли?
+        protected Dictionary<SecureSession<IPEndPoint>, int> addresses;
+        protected Dictionary<int, SecureSession<IPEndPoint>> sessions;
+        protected Dictionary<int, User> users;//TODO нужно ли?
 
 
         public Server()
@@ -26,8 +29,10 @@ namespace M9Studio.ShadowTalk.Server
 
             adapter = new TcpServerSecureTransportAdapter(socket);
             manager = new SecureChannelManager<IPEndPoint>(adapter);
+            addresses = new Dictionary<SecureSession<IPEndPoint>, int>();
             sessions = new Dictionary<int, SecureSession<IPEndPoint>>();
             users = new Dictionary<int, User>();
+
 
             manager.OnSecureSessionEstablished += Connect;
         }
@@ -50,29 +55,16 @@ namespace M9Studio.ShadowTalk.Server
             catch (Exception ex) { }
             Disconect(session);
         }
-        protected void LoginSuccess(SecureSession<IPEndPoint> session, User user)
+        protected void Disconect(SecureSession<IPEndPoint> session)
         {
-            List<Message> me = @base.Messages("SELECT * FROM messages WHERE recipient = ? AND type = ?", user.Id, (int)PacketServerToClientStatusMessages.CheckType.AWAITING);
-            @base.Send("UPDATE messages SET type = ? WHERE sender = ? AND type = ?", (int)PacketServerToClientStatusMessages.CheckType.VIEWED, user.Id, (int)PacketServerToClientStatusMessages.CheckType.AWAITING);
-
-            List<Message> status = @base.Messages("SELECT * FROM messages WHERE sender = ?", user.Id);
-            @base.Send("DELETE FROM messages WHERE sender = ? AND type != ?", user.Id, (int)PacketServerToClientStatusMessages.CheckType.AWAITING);
-
-            PacketServerToClientSendMessages packetMe = new PacketServerToClientSendMessages()
+            if (addresses.ContainsKey(session))
             {
-                Users = me.Select(x => x.Sender).ToArray(),
-                UUIDs = me.Select(x => x.UUID).ToArray(),
-                Texts = me.Select(x => x.Text).ToArray()
-            };
-            PacketServerToClientStatusMessages packetStatus = new PacketServerToClientStatusMessages()
-            {
-                Checks = status.Select(x => x.Type).ToArray(),
-                UUIDs = status.Select(x => x.UUID).ToArray()
-            };
-
-            session.Send(packetMe);
-            session.Send(packetStatus);
+                int id = addresses[session];
+                users.Remove(id);
+                sessions.Remove(id);
+                addresses.Remove(session);
+            }
+            adapter.Disconect(session.RemoteAddress);
         }
-        protected void Disconect(SecureSession<IPEndPoint> session) => adapter.Disconect(session.RemoteAddress);
     }
 }

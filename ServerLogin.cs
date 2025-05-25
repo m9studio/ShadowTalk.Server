@@ -17,6 +17,15 @@ namespace M9Studio.ShadowTalk.Server
                 return;
             }
             User user = users[0];
+
+            if (sessions.ContainsKey(user.Id))
+            {
+                session.Send(new PacketServerToClientLoginError());
+                Disconect(session);
+                return;
+            }
+
+
             if (user.Is2FA)
             {
                 PacketClientToServer2FA _2fa;
@@ -55,6 +64,38 @@ namespace M9Studio.ShadowTalk.Server
                 }
             }
             NewSRP(session, user);
+        }
+
+        protected void LoginSuccess(SecureSession<IPEndPoint> session, User user)
+        {
+            sessions[user.Id] = session;
+            addresses[session] = user.Id;
+            users[user.Id] = user;
+
+
+
+            List<Message> me = @base.Messages("SELECT * FROM messages WHERE recipient = ? AND type = ?", user.Id, (int)PacketServerToClientStatusMessages.CheckType.AWAITING);
+            @base.Send("UPDATE messages SET type = ? WHERE sender = ? AND type = ?", (int)PacketServerToClientStatusMessages.CheckType.VIEWED, user.Id, (int)PacketServerToClientStatusMessages.CheckType.AWAITING);
+
+            List<Message> status = @base.Messages("SELECT * FROM messages WHERE sender = ?", user.Id);
+            @base.Send("DELETE FROM messages WHERE sender = ? AND type != ?", user.Id, (int)PacketServerToClientStatusMessages.CheckType.AWAITING);
+
+            PacketServerToClientSendMessages packetMe = new PacketServerToClientSendMessages()
+            {
+                Users = me.Select(x => x.Sender).ToArray(),
+                UUIDs = me.Select(x => x.UUID).ToArray(),
+                Texts = me.Select(x => x.Text).ToArray()
+            };
+            PacketServerToClientStatusMessages packetStatus = new PacketServerToClientStatusMessages()
+            {
+                Checks = status.Select(x => x.Type).ToArray(),
+                UUIDs = status.Select(x => x.UUID).ToArray()
+            };
+
+            session.Send(packetMe);
+            session.Send(packetStatus);
+
+            Daemon(session, user);
         }
     }
 }
