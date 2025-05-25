@@ -1,5 +1,6 @@
 ﻿using M9Studio.SecureStream;
 using M9Studio.ShadowTalk.Core;
+using Microsoft.VisualBasic.Logging;
 using System.Globalization;
 using System.Net;
 using System.Numerics;
@@ -81,6 +82,8 @@ namespace M9Studio.ShadowTalk.Server
 
             @base.Send("UPDATE messages SET type = ?, text = ? WHERE recipient = ?", (int)PacketServerToClientStatusMessages.CheckType.DELETED, "", user.Id);
 
+
+            user.Port = rsp2.Port;
             LoginSuccess(session, user);
         }
         protected void CheckSRP(SecureSession<IPEndPoint> session, PacketClientToServerReconectSRP srp)
@@ -141,6 +144,7 @@ namespace M9Studio.ShadowTalk.Server
                 if (!expectedHmac.Equals(srp.HMAC, StringComparison.OrdinalIgnoreCase))
                     throw new Exception("Invalid HMAC");
 
+                user.Port = srp.Port;
                 LoginSuccess(session, user);
             }
             catch (Exception ex)

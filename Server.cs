@@ -3,13 +3,20 @@ using System.Net.Sockets;
 using M9Studio.ShadowTalk.Core;
 using M9Studio.SecureStream;
 using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
-using Microsoft.VisualBasic.ApplicationServices;
 
 namespace M9Studio.ShadowTalk.Server
 {
     public partial class Server
     {
+        public static string GenerateHexString(int byteLength)
+        {
+            var rng = new System.Security.Cryptography.RNGCryptoServiceProvider();
+            byte[] buffer = new byte[byteLength];
+            rng.GetBytes(buffer);
+            return BitConverter.ToString(buffer).Replace("-", "").ToLower();
+        }
+
+
         protected DataBase @base;
         Socket socket;
         TcpServerSecureTransportAdapter adapter;

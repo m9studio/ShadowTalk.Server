@@ -10,5 +10,7 @@
         public string Verifier;
         public bool Is2FA;
         public string RSA;//публичный ключ для сообщений
+
+        public int Port;//udp порт для p2p, не сохранять в бд
     }
 }
