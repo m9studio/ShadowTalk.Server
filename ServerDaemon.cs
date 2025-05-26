@@ -1,48 +1,79 @@
-﻿using M9Studio.SecureStream;
-using M9Studio.ShadowTalk.Core;
-using Microsoft.VisualBasic.ApplicationServices;
+﻿using M9Studio.ShadowTalk.Core;
 using Newtonsoft.Json.Linq;
-using System.Net;
-using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
+using Org.BouncyCastle.Bcpg;
+using System.Reflection;
 
 namespace M9Studio.ShadowTalk.Server
 {
     public partial class Server
     {
-        protected void Daemon(SecureSession<IPEndPoint> session, User user)
+        protected void Daemon(SecureSessionLogger session, User user)
         {
-            while (true)
+            int error = 10;
+            while (session.IsLive && error > 0)
             {
-                JObject packet = session.ReceiveJObject();
+                bool parse = false;
+                JObject packet;
                 try
                 {
-                    SearchUser(session, PacketStruct.Parse<PacketClientToServerSearchUser>(packet));
-                    continue;
-                } catch (Exception ex) { }
-                try
+                    packet = session.ReceiveJObject();
+                }
+                catch (Exception ex)
                 {
-                    SendMessage(session, user, PacketStruct.Parse<PacketClientToServerSendMessage>(packet));
+                    error--;
+                    logger.Log($"Daemon [IPEndPoint {session.RemoteAddress}]: {ex.Message}", Logger.Type.Daemon_Error);
                     continue;
                 }
-                catch (Exception ex) { }
-                try
+
+                if (
+                    DaemonMethod<PacketClientToServerSearchUser>(session, user, packet, SearchUser) ||
+                    DaemonMethod<PacketClientToServerConnectP2P>(session, user, packet, ConnectP2P) ||
+                    DaemonMethod<PacketClientToServerGetUser>(session, user, packet, GetUser) ||
+                    DaemonMethod<PacketClientToServerSendMessage>(session, user, packet, SendMessage)
+                    )
                 {
-                    GetUser(session, PacketStruct.Parse<PacketClientToServerGetUser>(packet));
-                    continue;
+                    //Прошло всё нормально или почти нормально
+                    error = 10;
                 }
-                catch (Exception ex) { }
-                try
+                else
                 {
-                    ConnectP2P(session, user, PacketStruct.Parse<PacketClientToServerConnectP2P>(packet));
-                    continue;
+                    logger.Log($"Daemon [IPEndPoint {session.RemoteAddress}]: Неизвестный пакет ({packet})", Logger.Type.Daemon_Error);
                 }
-                catch (Exception ex) { }
-                //Console.WriteLine("Error");
+            }
+            if (error <= 0)
+            {
+                logger.Log($"Daemon [IPEndPoint {session.RemoteAddress}]: Не стабильные пакеты", Logger.Type.Daemon_Error);
+                Disconnect(session);
             }
         }
-        private void SearchUser(SecureSession<IPEndPoint> session, PacketClientToServerSearchUser packet)
+
+        private bool DaemonMethod<T>(SecureSessionLogger session, User user, JObject json, DaemonMethodDelegate<T> method) where T : PacketStruct, new()
         {
+            T? packet = null;
+            try
+            {
+                packet = PacketStruct.Parse<T>(json);
+            }
+            catch (Exception ignore)
+            {
+                return false;
+            }
+            try
+            {
+                method.Invoke(session, user, packet);
+            }
+            catch (Exception ex)
+            {
+                logger.Log($"Daemon [IPEndPoint {session.RemoteAddress}]: {ex.Message}", Logger.Type.Daemon_Error);
+            }
+            return true;
+        }
+
+        private delegate void DaemonMethodDelegate<T>(SecureSessionLogger session, User user, T packet) where T : PacketStruct;
+
+        private void SearchUser(SecureSessionLogger session, User user, PacketClientToServerSearchUser packet)
+        {
+            logger.Log($"Daemon.SearchUser [IPEndPoint {session.RemoteAddress}]: Получен запрос ({packet})", Logger.Type.Daemon_SearchUser);
             List<User> users = @base.Users("SELECT * FROM users where name LIKE LIMIT 5", $"%{packet.Name}%");
             PacketServerToClientAnswerOnSearchUser answer = new PacketServerToClientAnswerOnSearchUser()
             {
@@ -51,10 +82,23 @@ namespace M9Studio.ShadowTalk.Server
                 RSAs = users.Select(x =>x.RSA).ToArray(),
                 Online = users.Select(x => sessions.ContainsKey(x.Id)).ToArray()
             };
-            session.Send(answer);
+            logger.Log($"Daemon.SearchUser [IPEndPoint {session.RemoteAddress}]: Отправляем пакет с ответом", Logger.Type.Daemon_SearchUser);
+            for (int i = 1; i <= 10; i++)
+            {
+                logger.Log($"Daemon.SearchUser [IPEndPoint {session.RemoteAddress}]: Попытка {i} из 10", Logger.Type.Daemon_SearchUser);
+                if (session.Send(answer))
+                {
+                    logger.Log($"Daemon.SearchUser [IPEndPoint {session.RemoteAddress}]: Пакет отправлен за {i} попыток", Logger.Type.Daemon_SearchUser);
+                    break;
+                }else if(i == 10)
+                {
+                    logger.Log($"Daemon.SearchUser [IPEndPoint {session.RemoteAddress}]: Пакет не удалось отправить", Logger.Type.Daemon_SearchUser);
+                }
+            }
         }
-        private void GetUser(SecureSession<IPEndPoint> session, PacketClientToServerGetUser packet)
+        private void GetUser(SecureSessionLogger session, User user, PacketClientToServerGetUser packet)
         {
+            logger.Log($"Daemon.GetUser [IPEndPoint {session.RemoteAddress}]: Получен запрос ({packet})", Logger.Type.Daemon_GetUser);
             List<User> users = @base.Users("SELECT * FROM users where id = ?", packet.Id);
             PacketServerToClientAnswerOnSearchUser answer = new PacketServerToClientAnswerOnSearchUser()
             {
@@ -63,9 +107,22 @@ namespace M9Studio.ShadowTalk.Server
                 RSAs = users.Select(x => x.RSA).ToArray(),
                 Online = users.Select(x => sessions.ContainsKey(x.Id)).ToArray()
             };
-            session.Send(answer);
+            logger.Log($"Daemon.GetUser [IPEndPoint {session.RemoteAddress}]: Отправляем пакет с ответом", Logger.Type.Daemon_GetUser);
+            for (int i = 1; i <= 10; i++)
+            {
+                logger.Log($"Daemon.GetUser [IPEndPoint {session.RemoteAddress}]: Попытка {i} из 10", Logger.Type.Daemon_GetUser);
+                if (session.Send(answer))
+                {
+                    logger.Log($"Daemon.GetUser [IPEndPoint {session.RemoteAddress}]: Пакет отправлен за {i} попыток", Logger.Type.Daemon_GetUser);
+                    break;
+                }
+                else if (i == 10)
+                {
+                    logger.Log($"Daemon.GetUser [IPEndPoint {session.RemoteAddress}]: Пакет не удалось отправить", Logger.Type.Daemon_GetUser);
+                }
+            }
         }
-        private void SendMessage(SecureSession<IPEndPoint> session, User user, PacketClientToServerSendMessage packet)
+        private void SendMessage(SecureSessionLogger session, User user, PacketClientToServerSendMessage packet)
         {
             if (sessions.ContainsKey(packet.Id))
             {
@@ -88,7 +145,7 @@ namespace M9Studio.ShadowTalk.Server
                 @base.Send("INSERT INTO messages (sender, recipient, uuid, text) VALUES (?, ?, ?, ?)", user.Id, packet.Id, packet.UUID, packet.Text);
             }
         }
-        private void ConnectP2P(SecureSession<IPEndPoint> session, User user, PacketClientToServerConnectP2P packet)
+        private void ConnectP2P(SecureSessionLogger session, User user, PacketClientToServerConnectP2P packet)
         {
             if (!sessions.ContainsKey(packet.UserId)){
                 session.Send(new PacketServerToClientErrorP2P());

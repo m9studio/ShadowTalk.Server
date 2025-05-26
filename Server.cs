@@ -18,52 +18,65 @@ namespace M9Studio.ShadowTalk.Server
 
 
         protected DataBase @base;
-        Socket socket;
-        TcpServerSecureTransportAdapter adapter;
-        SecureChannelManager<IPEndPoint> manager;
-
-        protected Dictionary<SecureSession<IPEndPoint>, int> addresses;
-        protected Dictionary<int, SecureSession<IPEndPoint>> sessions;
-        protected Dictionary<int, User> users;//TODO нужно ли?
+        protected Logger logger;
 
 
-        public Server()
+        private Socket socket;
+        private TcpServerSecureTransportAdapter adapter;
+        private SecureStreamLogger adapterLogger;
+        private SecureChannelManager<IPEndPoint> manager;
+
+        protected Dictionary<SecureSessionLogger, int> addresses;
+        protected Dictionary<int, SecureSessionLogger> sessions;
+        protected Dictionary<int, User> users;
+
+
+        public Server(Logger logger)
         {
             @base = new DataBase();
+            this.logger = logger;
+
+
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             socket.Bind(new IPEndPoint(IPAddress.Any, 55555));
             socket.Listen(10);
 
             adapter = new TcpServerSecureTransportAdapter(socket);
-            manager = new SecureChannelManager<IPEndPoint>(adapter);
-            addresses = new Dictionary<SecureSession<IPEndPoint>, int>();
-            sessions = new Dictionary<int, SecureSession<IPEndPoint>>();
+            //Для логов
+            adapterLogger = new SecureStreamLogger(adapter, logger);
+            manager = new SecureChannelManager<IPEndPoint>(adapterLogger);
+            //manager = new SecureChannelManager<IPEndPoint>(adapter);
+            addresses = new Dictionary<SecureSessionLogger, int>();
+            sessions = new Dictionary<int, SecureSessionLogger>();
             users = new Dictionary<int, User>();
 
 
-            manager.OnConnected += Connect;
-            manager.OnDisconnected += Disconnect;
+            manager.OnConnected += session => Connect(new SecureSessionLogger(session, logger));
+            manager.OnDisconnected += session => Disconnect(new SecureSessionLogger(session, logger));
         }
-        private void Connect(SecureSession<IPEndPoint> session)
+        private void Connect(SecureSessionLogger session)
         {
-            JObject packet = session.ReceiveJObject();
-
-            try
+            Task.Run(() =>
             {
-                CheckSRP(session, PacketStruct.Parse<PacketClientToServerReconectSRP>(packet));
-                return;
-            }
-            catch (Exception ex) { }
+                JObject packet = session.ReceiveJObject();
 
-            try
-            {
-                Login(session, PacketStruct.Parse<PacketClientToServerLogin>(packet));
-                return;
-            }
-            catch (Exception ex) { }
-            Disconnect(session);
+                try
+                {
+                    CheckSRP(session, PacketStruct.Parse<PacketClientToServerReconectSRP>(packet));
+                    return;
+                }
+                catch (Exception ex) { }
+
+                try
+                {
+                    Login(session, PacketStruct.Parse<PacketClientToServerLogin>(packet));
+                    return;
+                }
+                catch (Exception ex) { }
+                Disconnect(session);
+            });
         }
-        protected void Disconnect(SecureSession<IPEndPoint> session)
+        protected void Disconnect(SecureSessionLogger session)
         {
             if (addresses.ContainsKey(session))
             {

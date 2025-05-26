@@ -1,6 +1,5 @@
 ﻿using M9Studio.SecureStream;
 using M9Studio.ShadowTalk.Core;
-using Microsoft.VisualBasic.Logging;
 using System.Globalization;
 using System.Net;
 using System.Numerics;
@@ -11,7 +10,7 @@ namespace M9Studio.ShadowTalk.Server
 {
     public partial class Server
     {
-        protected void NewSRP(SecureSession<IPEndPoint> session, User user)
+        protected void NewSRP(SecureSessionLogger session, User user)
         {
             // Получаем входной пароль (например, хэш от клиента после login)
             string password = user.Password;
@@ -86,7 +85,7 @@ namespace M9Studio.ShadowTalk.Server
             user.Port = rsp2.Port;
             LoginSuccess(session, user);
         }
-        protected void CheckSRP(SecureSession<IPEndPoint> session, PacketClientToServerReconectSRP srp)
+        protected void CheckSRP(SecureSessionLogger session, PacketClientToServerReconectSRP srp)
         {
             try
             {

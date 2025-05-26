@@ -7,7 +7,7 @@ namespace M9Studio.ShadowTalk.Server
     public partial class Server
     {
         private Random random = new Random();
-        protected void Login(SecureSession<IPEndPoint> session, PacketClientToServerLogin login)
+        protected void Login(SecureSessionLogger session, PacketClientToServerLogin login)
         {
             List<User> users = @base.Users("SELECT * FROM users WHERE email = ? AND password = ?", login.Email, login.Password);
             if(users.Count == 0)
@@ -66,7 +66,7 @@ namespace M9Studio.ShadowTalk.Server
             NewSRP(session, user);
         }
 
-        protected void LoginSuccess(SecureSession<IPEndPoint> session, User user)
+        protected void LoginSuccess(SecureSessionLogger session, User user)
         {
             sessions[user.Id] = session;
             addresses[session] = user.Id;
@@ -95,7 +95,9 @@ namespace M9Studio.ShadowTalk.Server
             session.Send(packetMe);
             session.Send(packetStatus);
 
-            Daemon(session, user);
+            Task.Run(() => {
+                Daemon(session, user);
+            });
         }
     }
 }

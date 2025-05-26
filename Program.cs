@@ -8,5 +8,6 @@ namespace M9Studio.ShadowTalk.Server
             ApplicationConfiguration.Initialize();
             Application.Run(new FormMain());
         }
+
     }
 }
