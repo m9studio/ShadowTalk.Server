@@ -21,7 +21,7 @@ namespace M9Studio.ShadowTalk.Server
                 catch (Exception ex)
                 {
                     error--;
-                    logger.Log($"Daemon [IPEndPoint {session.RemoteAddress}]: {ex.Message}", Logger.Type.Daemon_Error);
+                    logger.Log($"Daemon [IPEndPoint {session.RemoteAddress}]: {ex.Message}", Logger.Type.Daemon);
                     continue;
                 }
 
@@ -37,13 +37,17 @@ namespace M9Studio.ShadowTalk.Server
                 }
                 else
                 {
-                    logger.Log($"Daemon [IPEndPoint {session.RemoteAddress}]: Неизвестный пакет ({packet})", Logger.Type.Daemon_Error);
+                    logger.Log($"Daemon [IPEndPoint {session.RemoteAddress}]: Неизвестный пакет ({packet})", Logger.Type.Daemon);
                 }
             }
             if (error <= 0)
             {
-                logger.Log($"Daemon [IPEndPoint {session.RemoteAddress}]: Не стабильные пакеты", Logger.Type.Daemon_Error);
+                logger.Log($"Daemon [IPEndPoint {session.RemoteAddress}]: Нестабильные пакеты", Logger.Type.Daemon);
                 Disconnect(session);
+            }
+            else
+            {
+                logger.Log($"Daemon [IPEndPoint {session.RemoteAddress}]: Отключился", Logger.Type.Daemon);
             }
         }
 
@@ -82,19 +86,8 @@ namespace M9Studio.ShadowTalk.Server
                 RSAs = users.Select(x =>x.RSA).ToArray(),
                 Online = users.Select(x => sessions.ContainsKey(x.Id)).ToArray()
             };
-            logger.Log($"Daemon.SearchUser [IPEndPoint {session.RemoteAddress}]: Отправляем пакет с ответом", Logger.Type.Daemon_SearchUser);
-            for (int i = 1; i <= 10; i++)
-            {
-                logger.Log($"Daemon.SearchUser [IPEndPoint {session.RemoteAddress}]: Попытка {i} из 10", Logger.Type.Daemon_SearchUser);
-                if (session.Send(answer))
-                {
-                    logger.Log($"Daemon.SearchUser [IPEndPoint {session.RemoteAddress}]: Пакет отправлен за {i} попыток", Logger.Type.Daemon_SearchUser);
-                    break;
-                }else if(i == 10)
-                {
-                    logger.Log($"Daemon.SearchUser [IPEndPoint {session.RemoteAddress}]: Пакет не удалось отправить", Logger.Type.Daemon_SearchUser);
-                }
-            }
+
+            Send(session, answer, Logger.Type.Daemon_SearchUser, "SearchUser");
         }
         private void GetUser(SecureSessionLogger session, User user, PacketClientToServerGetUser packet)
         {
@@ -107,41 +100,35 @@ namespace M9Studio.ShadowTalk.Server
                 RSAs = users.Select(x => x.RSA).ToArray(),
                 Online = users.Select(x => sessions.ContainsKey(x.Id)).ToArray()
             };
-            logger.Log($"Daemon.GetUser [IPEndPoint {session.RemoteAddress}]: Отправляем пакет с ответом", Logger.Type.Daemon_GetUser);
-            for (int i = 1; i <= 10; i++)
-            {
-                logger.Log($"Daemon.GetUser [IPEndPoint {session.RemoteAddress}]: Попытка {i} из 10", Logger.Type.Daemon_GetUser);
-                if (session.Send(answer))
-                {
-                    logger.Log($"Daemon.GetUser [IPEndPoint {session.RemoteAddress}]: Пакет отправлен за {i} попыток", Logger.Type.Daemon_GetUser);
-                    break;
-                }
-                else if (i == 10)
-                {
-                    logger.Log($"Daemon.GetUser [IPEndPoint {session.RemoteAddress}]: Пакет не удалось отправить", Logger.Type.Daemon_GetUser);
-                }
-            }
+
+            Send(session, answer, Logger.Type.Daemon_GetUser, "GetUser");
         }
         private void SendMessage(SecureSessionLogger session, User user, PacketClientToServerSendMessage packet)
         {
+            logger.Log($"Daemon.SendMessage [IPEndPoint {session.RemoteAddress}]: Получен запрос ({packet})", Logger.Type.Daemon_SendMessage);
             if (sessions.ContainsKey(packet.Id))
             {
+                logger.Log($"Daemon.SendMessage [IPEndPoint {session.RemoteAddress}]: Получатель в сети, проксируем сообщение через сервер", Logger.Type.Daemon_SendMessage);
                 PacketServerToClientSendMessages packet2 = new PacketServerToClientSendMessages()
                 {
-                    Texts = new string[] { packet.Text},
+                    Texts = new string[] { packet.Text },
                     UUIDs = new string[] { packet.UUID },
                     Users = new int[] { user.Id }
                 };
-                sessions[packet.Id].Send(packet2);
+
+                Send(session, sessions[packet.Id], packet2, Logger.Type.Daemon_SendMessage, "SendMessage");
+
                 PacketServerToClientStatusMessages packet3 = new PacketServerToClientStatusMessages()
                 {
                     Checks = new int[] { (int)PacketServerToClientStatusMessages.CheckType.VIEWED },
                     UUIDs = new string[] { packet.UUID }
                 };
-                session.Send(packet3);
+
+                Send(session, packet3, Logger.Type.Daemon_SendMessage, "SendMessage");
             }
             else
             {
+                logger.Log($"Daemon.SendMessage [IPEndPoint {session.RemoteAddress}]: Сохраняем сообщение", Logger.Type.Daemon_SendMessage);
                 @base.Send("INSERT INTO messages (sender, recipient, uuid, text) VALUES (?, ?, ?, ?)", user.Id, packet.Id, packet.UUID, packet.Text);
             }
         }
@@ -174,6 +161,40 @@ namespace M9Studio.ShadowTalk.Server
                 };
                 sessions[packet.UserId].Send(packet3);
             }
+        }
+
+
+
+        private bool Send(SecureSessionLogger sessionSender, SecureSessionLogger sessionRecipient, PacketStruct packet, Logger.Type logType, string method)
+        {
+            logger.Log($"Daemon.{method} [IPEndPoint {sessionSender.RemoteAddress} -> {sessionRecipient.RemoteAddress}]: Отправляем пакет с ответом", logType);
+            for (int i = 1; i <= 10; i++)
+            {
+                logger.Log($"Daemon.{method} [IPEndPoint {sessionSender.RemoteAddress} -> {sessionRecipient.RemoteAddress}]: Попытка {i} из 10", logType);
+                if (sessionRecipient.Send(packet))
+                {
+                    logger.Log($"Daemon.{method} [IPEndPoint {sessionSender.RemoteAddress} -> {sessionRecipient.RemoteAddress}]: Пакет отправлен за {i} попыток", logType);
+                    return true;
+                }
+            }
+            logger.Log($"Daemon.{method} [IPEndPoint {sessionSender.RemoteAddress} -> {sessionRecipient.RemoteAddress}]: Пакет не удалось отправить", logType);
+            return false;
+        }
+
+        private bool Send(SecureSessionLogger session, PacketStruct packet, Logger.Type logType, string method)
+        {
+            logger.Log($"Daemon.{method} [IPEndPoint {session.RemoteAddress}]: Отправляем пакет с ответом", logType);
+            for (int i = 1; i <= 10; i++)
+            {
+                logger.Log($"Daemon.{method} [IPEndPoint {session.RemoteAddress}]: Попытка {i} из 10", logType);
+                if (session.Send(packet))
+                {
+                    logger.Log($"Daemon.{method} [IPEndPoint {session.RemoteAddress}]: Пакет отправлен за {i} попыток", logType);
+                    return true;
+                }
+            }
+            logger.Log($"Daemon.{method} [IPEndPoint {session.RemoteAddress}]: Пакет не удалось отправить", logType);
+            return false;
         }
     }
 }

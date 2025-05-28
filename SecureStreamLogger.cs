@@ -37,7 +37,7 @@ namespace M9Studio.ShadowTalk.Server
             }
             catch (Exception ex)
             {
-                logger.Log($"SecureStream.ReceiveFrom(IPEndPoint {address}): Ошибка при получении: {ex.Message}", Logger.Type.SecureStream_Error);
+                logger.Log($"SecureStream.ReceiveFrom(IPEndPoint {address}): Ошибка при получении: {ex.Message}", Logger.Type.SecureStream_Receive);
                 throw new Exception(ex.Message);
             }
             logger.Log($"SecureStream.ReceiveFrom(IPEndPoint {address}): Получен зашифрованный пакет ({buffer})", Logger.Type.SecureStream_Receive);
@@ -54,7 +54,7 @@ namespace M9Studio.ShadowTalk.Server
             }
             catch (Exception ex)
             {
-                logger.Log($"SecureStream.SendTo(byte[] {buffer.GetHashCode()}, IPEndPoint {address}): Ошибка при отправке: {ex.Message}", Logger.Type.SecureStream_Error);
+                logger.Log($"SecureStream.SendTo(byte[] {buffer.GetHashCode()}, IPEndPoint {address}): Ошибка при отправке: {ex.Message}", Logger.Type.SecureStream_Send);
                 throw new Exception(ex.Message);
             }
             logger.Log($"SecureStream.SendTo(byte[] {buffer.GetHashCode()}, IPEndPoint {address}): Зашифрованный пакет {(result ? "" : "не")} отправлен", Logger.Type.SecureStream_Send);

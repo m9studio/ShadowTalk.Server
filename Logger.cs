@@ -17,14 +17,12 @@
             //SecureStream
             SecureStream_Send,
             SecureStream_Receive,
-            SecureStream_Error,
             SecureStream_Connect,
             SecureStream_Disconnect,
 
             //SecureSession
             SecureSession_Send,
             SecureSession_Receive,
-            SecureSession_Error,
             SecureSession_Disconnect,
             SecureSession_Connect,
 
@@ -35,7 +33,7 @@
             SRP_NewSRP,
             SRP_CheckSRP,
             //Daemon
-            Daemon_Error,
+            Daemon,
             Daemon_GetUser,
             Daemon_SearchUser,
             Daemon_SendMessage,

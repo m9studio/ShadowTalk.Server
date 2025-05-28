@@ -30,7 +30,7 @@ namespace M9Studio.ShadowTalk.Server
             }
             catch (Exception ex)
             {
-                logger.Log($"SecureSession.Receive() [IPEndPoint {RemoteAddress}]: Ошибка при получении: {ex.Message}", Logger.Type.SecureSession_Error);
+                logger.Log($"SecureSession.Receive() [IPEndPoint {RemoteAddress}]: Ошибка при получении: {ex.Message}", Logger.Type.SecureSession_Receive);
                 throw new Exception(ex.Message);
             }
             logger.Log($"SecureSession.Receive() [IPEndPoint {RemoteAddress}]: Получен пакет ({buffer})", Logger.Type.SecureSession_Receive);
@@ -61,7 +61,7 @@ namespace M9Studio.ShadowTalk.Server
             }
             catch (Exception ex)
             {
-                logger.Log($"SecureSession.Send(byte[] {buffer.GetHashCode()}) [IPEndPoint {RemoteAddress}]: Ошибка при отправке: {ex.Message}", Logger.Type.SecureStream_Error);
+                logger.Log($"SecureSession.Send(byte[] {buffer.GetHashCode()}) [IPEndPoint {RemoteAddress}]: Ошибка при отправке: {ex.Message}", Logger.Type.SecureStream_Send);
                 throw new Exception(ex.Message);
             }
             logger.Log($"SecureSession.Send(byte[] {buffer.GetHashCode()}) [IPEndPoint {RemoteAddress}]: Пакет {(result ? "" : "не")} отправлен", Logger.Type.SecureStream_Send);
