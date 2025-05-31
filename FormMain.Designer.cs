@@ -136,7 +136,7 @@
             ClientSize = new Size(821, 450);
             Controls.Add(splitContainer1);
             Name = "FormMain";
-            Text = "Server";
+            Text = "ShadowTalk Server";
             splitContainer1.Panel1.ResumeLayout(false);
             splitContainer1.Panel1.PerformLayout();
             splitContainer1.Panel2.ResumeLayout(false);
