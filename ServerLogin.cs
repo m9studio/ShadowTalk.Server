@@ -95,6 +95,7 @@ namespace M9Studio.ShadowTalk.Server
             session.Send(packetMe);
             session.Send(packetStatus);
 
+            Update();
             Task.Run(() => {
                 Daemon(session, user);
             });

@@ -128,6 +128,7 @@ namespace M9Studio.ShadowTalk.Server
             {
                 logger.Log($"Daemon.SendMessage [IPEndPoint {session.RemoteAddress}]: Сохраняем сообщение", Logger.Type.Daemon_SendMessage);
                 @base.Send("INSERT INTO messages (sender, recipient, uuid, text) VALUES (?, ?, ?, ?)", user.Id, packet.Id, packet.UUID, packet.Text);
+                Update();
             }
         }
         private void ConnectP2P(SecureSessionLogger session, User user, PacketClientToServerConnectP2P packet)

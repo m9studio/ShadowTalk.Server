@@ -56,18 +56,60 @@ namespace M9Studio.ShadowTalk.Server
             sessions = new Dictionary<int, SecureSessionLogger>();
             users = new Dictionary<int, User>();
 
-
             logger.UpdateAddress(allIP(55555));
-            logger.UpdateUser(@base.Count("SELECT COUNT(*) AS num FROM users"));
-            logger.UpdateUserOnline(0);
-            logger.UpdateMessage(@base.Count("SELECT COUNT(*) AS num FROM messages"));
-            logger.UpdateMessageWaiting(@base.Count("SELECT COUNT(*) AS num FROM messages where type = ?", (int)PacketServerToClientStatusMessages.CheckType.AWAITING));
-            logger.UpdateMessageDeleted(@base.Count("SELECT COUNT(*) AS num FROM messages where type = ?", (int)PacketServerToClientStatusMessages.CheckType.DELETED));
-
+            Update();
 
             manager.OnConnected += session => Connect(new SecureSessionLogger(session, logger));
             manager.OnDisconnected += session => Disconnect(new SecureSessionLogger(session, logger));
+
+
+
         }
+
+        protected void Update()
+        {
+            Task.Run(() =>
+            {
+                UpdateUser();
+                UpdateUserOnline();
+                UpdateMessage();
+                UpdateMessageWaiting();
+                UpdateMessageDeleted();
+            });
+        }
+        protected void UpdateUser()
+        {
+            logger.UpdateUser(
+                @base.Count(
+                    "SELECT COUNT(*) AS num FROM users"));
+        }
+        protected void UpdateUserOnline()
+        {
+            logger.UpdateUserOnline(sessions.Count);
+        }
+        protected void UpdateMessage()
+        {
+            logger.UpdateMessage(
+                @base.Count(
+                    "SELECT COUNT(*) AS num FROM messages"));
+        }
+        protected void UpdateMessageWaiting()
+        {
+            logger.UpdateMessageWaiting(
+                @base.Count(
+                    "SELECT COUNT(*) AS num FROM messages where type = ?",
+                    (int)PacketServerToClientStatusMessages.CheckType.AWAITING));
+        }
+        protected void UpdateMessageDeleted()
+        {
+
+            logger.UpdateMessageDeleted(
+                @base.Count(
+                    "SELECT COUNT(*) AS num FROM messages where type = ?",
+                    (int)PacketServerToClientStatusMessages.CheckType.DELETED));
+        }
+
+
 
 
         static string allIP(int port)
@@ -119,6 +161,7 @@ namespace M9Studio.ShadowTalk.Server
                 addresses.Remove(session);
             }
             adapter.Disconect(session.RemoteAddress);
+            Update();
         }
     }
 }
