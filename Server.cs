@@ -3,6 +3,7 @@ using System.Net.Sockets;
 using M9Studio.ShadowTalk.Core;
 using M9Studio.SecureStream;
 using Newtonsoft.Json.Linq;
+using System.Net.NetworkInformation;
 
 namespace M9Studio.ShadowTalk.Server
 {
@@ -20,6 +21,7 @@ namespace M9Studio.ShadowTalk.Server
         protected DataBase @base;
         protected Logger logger;
 
+        public readonly IPEndPoint Address;
 
         private Socket socket;
         private TcpServerSecureTransportAdapter adapter;
@@ -31,6 +33,7 @@ namespace M9Studio.ShadowTalk.Server
         protected Dictionary<int, User> users;
 
 
+
         public Server(Logger logger)
         {
             @base = new DataBase();
@@ -38,7 +41,10 @@ namespace M9Studio.ShadowTalk.Server
 
 
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            socket.Bind(new IPEndPoint(IPAddress.Any, 55555));
+
+            Address = new IPEndPoint(IPAddress.Any, 55555);
+
+            socket.Bind(Address);
             socket.Listen(10);
 
             adapter = new TcpServerSecureTransportAdapter(socket);
@@ -51,9 +57,36 @@ namespace M9Studio.ShadowTalk.Server
             users = new Dictionary<int, User>();
 
 
+            logger.UpdateAddress(allIP(55555));
+            logger.UpdateUser(@base.Count("SELECT COUNT(*) AS num FROM users"));
+            logger.UpdateUserOnline(0);
+            logger.UpdateMessage(@base.Count("SELECT COUNT(*) AS num FROM messages"));
+            logger.UpdateMessageWaiting(@base.Count("SELECT COUNT(*) AS num FROM messages where type = ?", (int)PacketServerToClientStatusMessages.CheckType.AWAITING));
+            logger.UpdateMessageDeleted(@base.Count("SELECT COUNT(*) AS num FROM messages where type = ?", (int)PacketServerToClientStatusMessages.CheckType.DELETED));
+
+
             manager.OnConnected += session => Connect(new SecureSessionLogger(session, logger));
             manager.OnDisconnected += session => Disconnect(new SecureSessionLogger(session, logger));
         }
+
+
+        static string allIP(int port)
+        {
+            string hostName = Dns.GetHostName();
+            var ipAddresses = Dns.GetHostEntry(hostName).AddressList;
+
+            string ret = "";
+            ret += "0.0.0.0:" + port + "\n";
+            ret += "127.0.0.1:" + port + "\n";
+            foreach (var ip in ipAddresses)
+            {
+                ret += ip.ToString() + ":" + port + "\n";
+            }
+            return ret;
+        }
+
+
+
         private void Connect(SecureSessionLogger session)
         {
             Task.Run(() =>

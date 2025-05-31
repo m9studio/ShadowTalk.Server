@@ -28,92 +28,132 @@
         /// </summary>
         private void InitializeComponent()
         {
-            labelAddress = new Label();
-            labelUser = new Label();
-            labelUserOnline = new Label();
-            labelMessage = new Label();
-            labelMessageWaiting = new Label();
+            splitContainer1 = new SplitContainer();
             labelMessageDeleted = new Label();
+            labelMessageWaiting = new Label();
+            labelMessage = new Label();
+            labelUserOnline = new Label();
+            labelUser = new Label();
+            labelAddress = new Label();
+            listBoxLog = new ListBox();
+            ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
+            splitContainer1.Panel1.SuspendLayout();
+            splitContainer1.Panel2.SuspendLayout();
+            splitContainer1.SuspendLayout();
             SuspendLayout();
             // 
-            // labelAddress
+            // splitContainer1
             // 
-            labelAddress.AutoSize = true;
-            labelAddress.Location = new Point(12, 9);
-            labelAddress.Name = "labelAddress";
-            labelAddress.Size = new Size(74, 15);
-            labelAddress.TabIndex = 0;
-            labelAddress.Text = "labelAddress";
+            splitContainer1.Dock = DockStyle.Fill;
+            splitContainer1.Location = new Point(0, 0);
+            splitContainer1.Name = "splitContainer1";
             // 
-            // labelUser
+            // splitContainer1.Panel1
             // 
-            labelUser.AutoSize = true;
-            labelUser.Location = new Point(12, 24);
-            labelUser.Name = "labelUser";
-            labelUser.Size = new Size(55, 15);
-            labelUser.TabIndex = 1;
-            labelUser.Text = "labelUser";
+            splitContainer1.Panel1.Controls.Add(labelMessageDeleted);
+            splitContainer1.Panel1.Controls.Add(labelMessageWaiting);
+            splitContainer1.Panel1.Controls.Add(labelMessage);
+            splitContainer1.Panel1.Controls.Add(labelUserOnline);
+            splitContainer1.Panel1.Controls.Add(labelUser);
+            splitContainer1.Panel1.Controls.Add(labelAddress);
             // 
-            // labelUserOnline
+            // splitContainer1.Panel2
             // 
-            labelUserOnline.AutoSize = true;
-            labelUserOnline.Location = new Point(12, 39);
-            labelUserOnline.Name = "labelUserOnline";
-            labelUserOnline.Size = new Size(90, 15);
-            labelUserOnline.TabIndex = 2;
-            labelUserOnline.Text = "labelUserOnline";
-            // 
-            // labelMessage
-            // 
-            labelMessage.AutoSize = true;
-            labelMessage.Location = new Point(12, 54);
-            labelMessage.Name = "labelMessage";
-            labelMessage.Size = new Size(78, 15);
-            labelMessage.TabIndex = 3;
-            labelMessage.Text = "labelMessage";
-            // 
-            // labelMessageWaiting
-            // 
-            labelMessageWaiting.AutoSize = true;
-            labelMessageWaiting.Location = new Point(12, 69);
-            labelMessageWaiting.Name = "labelMessageWaiting";
-            labelMessageWaiting.Size = new Size(119, 15);
-            labelMessageWaiting.TabIndex = 4;
-            labelMessageWaiting.Text = "labelMessageWaiting";
+            splitContainer1.Panel2.Controls.Add(listBoxLog);
+            splitContainer1.Size = new Size(821, 450);
+            splitContainer1.SplitterDistance = 273;
+            splitContainer1.TabIndex = 0;
             // 
             // labelMessageDeleted
             // 
             labelMessageDeleted.AutoSize = true;
-            labelMessageDeleted.Location = new Point(13, 84);
+            labelMessageDeleted.Location = new Point(13, 69);
             labelMessageDeleted.Name = "labelMessageDeleted";
             labelMessageDeleted.Size = new Size(118, 15);
-            labelMessageDeleted.TabIndex = 5;
+            labelMessageDeleted.TabIndex = 11;
             labelMessageDeleted.Text = "labelMessageDeleted";
+            // 
+            // labelMessageWaiting
+            // 
+            labelMessageWaiting.AutoSize = true;
+            labelMessageWaiting.Location = new Point(12, 54);
+            labelMessageWaiting.Name = "labelMessageWaiting";
+            labelMessageWaiting.Size = new Size(119, 15);
+            labelMessageWaiting.TabIndex = 10;
+            labelMessageWaiting.Text = "labelMessageWaiting";
+            // 
+            // labelMessage
+            // 
+            labelMessage.AutoSize = true;
+            labelMessage.Location = new Point(12, 39);
+            labelMessage.Name = "labelMessage";
+            labelMessage.Size = new Size(78, 15);
+            labelMessage.TabIndex = 9;
+            labelMessage.Text = "labelMessage";
+            // 
+            // labelUserOnline
+            // 
+            labelUserOnline.AutoSize = true;
+            labelUserOnline.Location = new Point(12, 24);
+            labelUserOnline.Name = "labelUserOnline";
+            labelUserOnline.Size = new Size(90, 15);
+            labelUserOnline.TabIndex = 8;
+            labelUserOnline.Text = "labelUserOnline";
+            // 
+            // labelUser
+            // 
+            labelUser.AutoSize = true;
+            labelUser.Location = new Point(12, 9);
+            labelUser.Name = "labelUser";
+            labelUser.Size = new Size(55, 15);
+            labelUser.TabIndex = 7;
+            labelUser.Text = "labelUser";
+            // 
+            // labelAddress
+            // 
+            labelAddress.AutoSize = true;
+            labelAddress.Location = new Point(13, 118);
+            labelAddress.Name = "labelAddress";
+            labelAddress.Size = new Size(74, 15);
+            labelAddress.TabIndex = 6;
+            labelAddress.Text = "labelAddress";
+            // 
+            // listBoxLog
+            // 
+            listBoxLog.Dock = DockStyle.Fill;
+            listBoxLog.FormattingEnabled = true;
+            listBoxLog.IntegralHeight = false;
+            listBoxLog.ItemHeight = 15;
+            listBoxLog.Location = new Point(0, 0);
+            listBoxLog.Name = "listBoxLog";
+            listBoxLog.Size = new Size(544, 450);
+            listBoxLog.TabIndex = 0;
             // 
             // FormMain
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
-            Controls.Add(labelMessageDeleted);
-            Controls.Add(labelMessageWaiting);
-            Controls.Add(labelMessage);
-            Controls.Add(labelUserOnline);
-            Controls.Add(labelUser);
-            Controls.Add(labelAddress);
+            ClientSize = new Size(821, 450);
+            Controls.Add(splitContainer1);
             Name = "FormMain";
             Text = "Server";
+            splitContainer1.Panel1.ResumeLayout(false);
+            splitContainer1.Panel1.PerformLayout();
+            splitContainer1.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
+            splitContainer1.ResumeLayout(false);
             ResumeLayout(false);
-            PerformLayout();
         }
 
         #endregion
 
-        private Label labelAddress;
-        private Label labelUser;
-        private Label labelUserOnline;
-        private Label labelMessage;
-        private Label labelMessageWaiting;
+        private SplitContainer splitContainer1;
         private Label labelMessageDeleted;
+        private Label labelMessageWaiting;
+        private Label labelMessage;
+        private Label labelUserOnline;
+        private Label labelUser;
+        private Label labelAddress;
+        private ListBox listBoxLog;
     }
 }

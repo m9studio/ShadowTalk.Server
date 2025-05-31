@@ -89,5 +89,18 @@ namespace M9Studio.ShadowTalk.Server
             return result;
         }
 
+
+        public override int GetHashCode()
+        {
+            return RemoteAddress.GetHashCode();
+        }
+        public override bool Equals(object? obj)
+        {
+            if (obj is SecureSessionLogger)
+            {
+                return RemoteAddress == ((SecureSessionLogger)obj).RemoteAddress;
+            }
+            return false;
+        }
     }
 }

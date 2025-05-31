@@ -113,6 +113,27 @@ namespace M9Studio.ShadowTalk.Server
             return messages;
         }
 
+        public int Count(string request, params object[] param)
+        {
+            int count = -1;
+            using (var cmd = new SQLiteCommand(request, connection))
+            {
+                foreach (var p in param)
+                {
+                    cmd.Parameters.AddWithValue(null, p);
+                }
+
+                using (var reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        count = Convert.ToInt32(reader["num"]);
+                    }
+                }
+            }
+            return count;
+        }
+
         public void Send(string request, params object[] param)
         {
             using (var cmd = new SQLiteCommand(request, connection))

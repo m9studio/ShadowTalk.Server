@@ -1,7 +1,5 @@
 ﻿using M9Studio.ShadowTalk.Core;
 using Newtonsoft.Json.Linq;
-using Org.BouncyCastle.Bcpg;
-using System.Reflection;
 
 namespace M9Studio.ShadowTalk.Server
 {
@@ -68,7 +66,7 @@ namespace M9Studio.ShadowTalk.Server
             }
             catch (Exception ex)
             {
-                logger.Log($"Daemon [IPEndPoint {session.RemoteAddress}]: {ex.Message}", Logger.Type.Daemon_Error);
+                logger.Log($"Daemon [IPEndPoint {session.RemoteAddress}]: {ex.Message}", Logger.Type.Daemon);
             }
             return true;
         }
