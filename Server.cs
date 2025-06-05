@@ -17,12 +17,10 @@ namespace M9Studio.ShadowTalk.Server
             return BitConverter.ToString(buffer).Replace("-", "").ToLower();
         }
 
-
         protected DataBase @base;
         protected Logger logger;
 
         public readonly IPEndPoint Address;
-
         private Socket socket;
         private TcpServerSecureTransportAdapter adapter;
         private SecureStreamLogger adapterLogger;

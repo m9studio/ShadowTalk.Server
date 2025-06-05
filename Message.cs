@@ -6,6 +6,7 @@
         public int Recipient;//получатель
         public string UUID;
         public string Text;
+        public int Date = 0;
         public int Type = 0;
     }
 }

@@ -104,6 +104,7 @@ namespace M9Studio.ShadowTalk.Server
         private void SendMessage(SecureSessionLogger session, User user, PacketClientToServerSendMessage packet)
         {
             logger.Log($"Daemon.SendMessage [IPEndPoint {session.RemoteAddress}]: Получен запрос ({packet})", Logger.Type.Daemon_SendMessage);
+            int time = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             if (sessions.ContainsKey(packet.Id))
             {
                 logger.Log($"Daemon.SendMessage [IPEndPoint {session.RemoteAddress}]: Получатель в сети, проксируем сообщение через сервер", Logger.Type.Daemon_SendMessage);
@@ -111,6 +112,7 @@ namespace M9Studio.ShadowTalk.Server
                 {
                     Texts = new string[] { packet.Text },
                     UUIDs = new string[] { packet.UUID },
+                    Dates = new int[] { time },
                     Users = new int[] { user.Id }
                 };
 
@@ -127,7 +129,7 @@ namespace M9Studio.ShadowTalk.Server
             else
             {
                 logger.Log($"Daemon.SendMessage [IPEndPoint {session.RemoteAddress}]: Сохраняем сообщение", Logger.Type.Daemon_SendMessage);
-                @base.Send("INSERT INTO messages (sender, recipient, uuid, text) VALUES (?, ?, ?, ?)", user.Id, packet.Id, packet.UUID, packet.Text);
+                @base.Send("INSERT INTO messages (sender, recipient, uuid, text, date) VALUES (?, ?, ?, ?, ?)", user.Id, packet.Id, packet.UUID, packet.Text, time);
                 Update();
             }
         }
@@ -153,7 +155,7 @@ namespace M9Studio.ShadowTalk.Server
                 {
                     UserId = user.Id,
                     UserName = user.Name,
-
+                    RSA = user.RSA,
                     Key = key,
                     Port = user.Port,
                     Ip = session.RemoteAddress.Address.ToString()

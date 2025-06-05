@@ -1,4 +1,5 @@
 ﻿using System.Data.SQLite;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace M9Studio.ShadowTalk.Server
 {
@@ -43,6 +44,7 @@ namespace M9Studio.ShadowTalk.Server
                         recipient INTEGER,
                         uuid TEXT PRIMARY KEY,
                         text TEXT,
+                        date INTEGER,
                         type INTEGER DEFAULT 0
                     );";
                 using (var cmd = new SQLiteCommand(createMessagesTable, connection))
@@ -104,6 +106,7 @@ namespace M9Studio.ShadowTalk.Server
                             Recipient = Convert.ToInt32(reader["recipient"]),
                             UUID = reader["uuid"]?.ToString(),
                             Text = reader["text"]?.ToString(),
+                            Date = Convert.ToInt32(reader["date"]),
                             Type = Convert.ToInt32(reader["type"])
                         });
                     }
