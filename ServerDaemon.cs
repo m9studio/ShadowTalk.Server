@@ -8,8 +8,12 @@ namespace M9Studio.ShadowTalk.Server
         protected void Daemon(SecureSessionLogger session, User user)
         {
             int error = 10;
-            while (session.IsLive && error > 0)
+            while (error > 0)
             {
+                if (!session.IsLive)
+                {
+                    break;
+                }
                 bool parse = false;
                 JObject packet;
                 try
@@ -76,7 +80,7 @@ namespace M9Studio.ShadowTalk.Server
         private void SearchUser(SecureSessionLogger session, User user, PacketClientToServerSearchUser packet)
         {
             logger.Log($"Daemon.SearchUser [IPEndPoint {session.RemoteAddress}]: Получен запрос ({packet})", Logger.Type.Daemon_SearchUser);
-            List<User> users = @base.Users("SELECT * FROM users where name LIKE LIMIT 5", $"%{packet.Name}%");
+            List<User> users = @base.Users("SELECT * FROM users where name LIKE ? LIMIT 5", $"%{packet.Name}%");
             PacketServerToClientAnswerOnSearchUser answer = new PacketServerToClientAnswerOnSearchUser()
             {
                 Ids = users.Select(x => x.Id).ToArray(),

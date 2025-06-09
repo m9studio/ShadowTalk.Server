@@ -40,24 +40,24 @@ namespace M9Studio.ShadowTalk.Server
                 logger.Log($"SecureStream.ReceiveFrom(IPEndPoint {address}): Ошибка при получении: {ex.Message}", Logger.Type.SecureStream_Receive);
                 throw new Exception(ex.Message);
             }
-            logger.Log($"SecureStream.ReceiveFrom(IPEndPoint {address}): Получен зашифрованный пакет ({buffer})", Logger.Type.SecureStream_Receive);
+            logger.Log($"SecureStream.ReceiveFrom(IPEndPoint {address}): Получен зашифрованный пакет (hash: {buffer.GetHashCode()} size: {buffer.Length})", Logger.Type.SecureStream_Receive);
             return buffer;
         }
 
         public bool SendTo(byte[] buffer, IPEndPoint address)
         {
             bool result;
-            logger.Log($"SecureStream.SendTo(byte[] {buffer.GetHashCode()}, IPEndPoint {address}): Пытаемся отправить зашифрованный пакет ({buffer})", Logger.Type.SecureStream_Send);
+            logger.Log($"SecureStream.SendTo(byte[] hash: {buffer.GetHashCode()} size: {buffer.Length}, IPEndPoint {address}): Пытаемся отправить зашифрованный пакет", Logger.Type.SecureStream_Send);
             try
             {
                 result = adapter.SendTo(buffer, address);
             }
             catch (Exception ex)
             {
-                logger.Log($"SecureStream.SendTo(byte[] {buffer.GetHashCode()}, IPEndPoint {address}): Ошибка при отправке: {ex.Message}", Logger.Type.SecureStream_Send);
+                logger.Log($"SecureStream.SendTo(byte[] hash: {buffer.GetHashCode()} size: {buffer.Length}, IPEndPoint {address}): Ошибка при отправке: {ex.Message}", Logger.Type.SecureStream_Send);
                 throw new Exception(ex.Message);
             }
-            logger.Log($"SecureStream.SendTo(byte[] {buffer.GetHashCode()}, IPEndPoint {address}): Зашифрованный пакет {(result ? "" : "не")} отправлен", Logger.Type.SecureStream_Send);
+            logger.Log($"SecureStream.SendTo(byte[] hash: {buffer.GetHashCode()} size: {buffer.Length}, IPEndPoint {address}): Зашифрованный пакет {(result ? "" : "не")} отправлен", Logger.Type.SecureStream_Send);
             return result;
         }
     }

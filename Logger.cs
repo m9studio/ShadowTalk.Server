@@ -36,7 +36,7 @@ namespace M9Studio.ShadowTalk.Server
 
         public void Log(string log, Type type)
         {
-            if (logged.Contains(type))
+            //if (logged.Contains(type))
             {
                 list.Invoke(() => {
                     list.Items.Add(log);

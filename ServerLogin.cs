@@ -9,7 +9,7 @@ namespace M9Studio.ShadowTalk.Server
         private Random random = new Random();
         protected void Login(SecureSessionLogger session, PacketClientToServerLogin login)
         {
-            List<User> users = @base.Users("SELECT * FROM users WHERE email = ? AND password = ?", login.Email, login.Password);
+            List<User> users = @base.Users("SELECT * FROM users WHERE email = ?", login.Email);
             if(users.Count == 0)
             {
                 session.Send(new PacketServerToClientLoginError());

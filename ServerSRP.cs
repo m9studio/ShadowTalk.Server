@@ -1,5 +1,10 @@
 ﻿using M9Studio.SecureStream;
 using M9Studio.ShadowTalk.Core;
+using Newtonsoft.Json.Linq;
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Crypto.Macs;
+using Org.BouncyCastle.Utilities.Encoders;
+using System.Diagnostics;
 using System.Globalization;
 using System.Net;
 using System.Numerics;
@@ -66,18 +71,33 @@ namespace M9Studio.ShadowTalk.Server
             BigInteger A = BigInteger.Parse(rsp2.A, NumberStyles.HexNumber);
             BigInteger u = SRPHelper.ComputeU(A, B, N);
             BigInteger S = BigInteger.ModPow((A * BigInteger.ModPow(v, u, N)) % N, b, N);
+
             byte[] K = SRPHelper.Hash(S);
 
             string M1_expected = SRPHelper.ComputeM1(A, B, K);
+            /*
+            Debug.WriteLine($"Server X = {x}");
+            Debug.WriteLine("SERVER SALT: " + saltHex);
+            Debug.WriteLine($"SERVER A = {rsp2.A}");
+            Debug.WriteLine($"SERVER B = {B.ToString("X")}");
+            Debug.WriteLine($"SERVER u = {u}");
+            Debug.WriteLine($"SERVER S = {S.ToString("X")}");
+            Debug.WriteLine($"SERVER K = {Convert.ToHexString(K)}");
+            Debug.WriteLine($"SERVER M1_expected = {M1_expected}");
+            Debug.WriteLine($"SERVER M1_received = {rsp2.M1}");
+            */
+
             if (rsp2.M1 != M1_expected)
             {
                 Disconnect(session);
                 return;
             }
             user.RSA = rsp2.RSA;
+            user.B = BHex;
+            user.b = b.ToString("X");
 
             // Обновляем базу
-            @base.Send("UPDATE users SET salt = ?, verifier = ?, rsa = ? WHERE id = ?", user.Salt, user.Verifier, user.RSA, user.Id);
+            @base.Send("UPDATE users SET salt = ?, verifier = ?, rsa = ?, b1 = ?, b2 = ? WHERE id = ?", user.Salt, user.Verifier, user.RSA, user.B, user.b, user.Id);
 
             @base.Send("UPDATE messages SET type = ?, text = ? WHERE recipient = ?", (int)PacketServerToClientStatusMessages.CheckType.DELETED, "", user.Id);
 
@@ -123,23 +143,29 @@ namespace M9Studio.ShadowTalk.Server
 
                 BigInteger v = BigInteger.Parse(user.Verifier, NumberStyles.HexNumber);
                 BigInteger A = BigInteger.Parse(srp.A, NumberStyles.HexNumber);
+                BigInteger B = BigInteger.Parse(user.B, NumberStyles.HexNumber);
+                BigInteger b = BigInteger.Parse(user.b, NumberStyles.HexNumber);
 
-                // Генерация b и B
-                byte[] bBytes = SRPHelper.GenerateRandomBytes(32);
-                BigInteger b = new BigInteger(bBytes, isUnsigned: true, isBigEndian: true);
-                BigInteger B = (k * v + BigInteger.ModPow(g, b, N)) % N;
-
-                // u = H(A | B)
                 BigInteger u = SRPHelper.ComputeU(A, B, N);
-
-                // S = (A * v^u)^b mod N
                 BigInteger S = BigInteger.ModPow((A * BigInteger.ModPow(v, u, N)) % N, b, N);
-
-                // K = H(S)
                 byte[] K = SRPHelper.Hash(S);
 
-                // Проверка HMAC
                 string expectedHmac = SRPHelper.ComputeHMAC(K, srp.Token);
+
+
+
+                Debug.WriteLine("Server: ");
+                Debug.WriteLine($"Verifier {user.Verifier}");
+                Debug.WriteLine($"A {A.ToString("X")}");
+                Debug.WriteLine($"B {B}");
+                Debug.WriteLine($"u {u}");
+                Debug.WriteLine($"S {S}");
+                Debug.WriteLine($"k {k}");
+                Debug.WriteLine($"K {Convert.ToHexString(K)}");
+                Debug.WriteLine($"expectedHmac {expectedHmac}");
+
+
+
                 if (!expectedHmac.Equals(srp.HMAC, StringComparison.OrdinalIgnoreCase))
                     throw new Exception("Invalid HMAC");
 
@@ -149,6 +175,7 @@ namespace M9Studio.ShadowTalk.Server
             catch (Exception ex)
             {
                 //Console.WriteLine($"[Reconnect Fail] {ex.Message}");
+                Debug.WriteLine(ex.Message);
                 session.Send(new PacketServerToClientLoginError());
                 Disconnect(session);
             }

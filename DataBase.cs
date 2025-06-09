@@ -30,7 +30,9 @@ namespace M9Studio.ShadowTalk.Server
                         salt TEXT,
                         verifier TEXT,
                         is2fa INTEGER,
-                        rsa TEXT
+                        rsa TEXT,
+                        b1 TEXT,
+                        b2 TEXT
                     );";
                 using (var cmd = new SQLiteCommand(createTable, connection))
                 {
@@ -77,7 +79,9 @@ namespace M9Studio.ShadowTalk.Server
                             Salt = reader["salt"]?.ToString(),
                             Verifier = reader["verifier"]?.ToString(),
                             Is2FA = Convert.ToInt32(reader["is2fa"]) == 1,
-                            RSA = reader["rsa"]?.ToString()
+                            RSA = reader["rsa"]?.ToString(),
+                            B = reader["b1"]?.ToString(),
+                            b = reader["b2"]?.ToString(),
                         });
                     }
                 }

@@ -40,7 +40,7 @@ namespace M9Studio.ShadowTalk.Server
 
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-            Address = new IPEndPoint(IPAddress.Any, 55555);
+            Address = new IPEndPoint(IPAddress.Any, 60606);
 
             socket.Bind(Address);
             socket.Listen(10);

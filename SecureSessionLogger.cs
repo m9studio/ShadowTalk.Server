@@ -33,7 +33,7 @@ namespace M9Studio.ShadowTalk.Server
                 logger.Log($"SecureSession.Receive() [IPEndPoint {RemoteAddress}]: Ошибка при получении: {ex.Message}", Logger.Type.SecureSession_Receive);
                 throw new Exception(ex.Message);
             }
-            logger.Log($"SecureSession.Receive() [IPEndPoint {RemoteAddress}]: Получен пакет ({buffer})", Logger.Type.SecureSession_Receive);
+            logger.Log($"SecureSession.Receive() [IPEndPoint {RemoteAddress}]: Получен пакет (hash: {buffer.GetHashCode()} size: {buffer.Length})", Logger.Type.SecureSession_Receive);
             return buffer;
         }
         public string ReceiveString()
@@ -41,7 +41,7 @@ namespace M9Studio.ShadowTalk.Server
             logger.Log($"SecureSession.ReceiveString() [IPEndPoint {RemoteAddress}]: Ожидаем пакет", Logger.Type.SecureSession_Receive);
             string result =  Encoding.UTF8.GetString(Receive());
             logger.Log($"SecureSession.ReceiveString() [IPEndPoint {RemoteAddress}]: Получен пакет ({result})", Logger.Type.SecureSession_Receive);
-            return session.ReceiveString();
+            return result;
         }
         public JObject ReceiveJObject()
         {
@@ -54,17 +54,17 @@ namespace M9Studio.ShadowTalk.Server
         public bool Send(byte[] buffer)
         {
             bool result;
-            logger.Log($"SecureSession.Send(byte[] {buffer.GetHashCode()}) [IPEndPoint {RemoteAddress}]: Пытаемся отправить пакет ({buffer})", Logger.Type.SecureStream_Send);
+            logger.Log($"SecureSession.Send(byte[]  hash: {buffer.GetHashCode()} size: {buffer.Length}) [IPEndPoint {RemoteAddress}]: Пытаемся отправить пакет", Logger.Type.SecureStream_Send);
             try
             {
                 result = session.Send(buffer);
             }
             catch (Exception ex)
             {
-                logger.Log($"SecureSession.Send(byte[] {buffer.GetHashCode()}) [IPEndPoint {RemoteAddress}]: Ошибка при отправке: {ex.Message}", Logger.Type.SecureStream_Send);
+                logger.Log($"SecureSession.Send(byte[]  hash: {buffer.GetHashCode()} size: {buffer.Length}) [IPEndPoint {RemoteAddress}]: Ошибка при отправке: {ex.Message}", Logger.Type.SecureStream_Send);
                 throw new Exception(ex.Message);
             }
-            logger.Log($"SecureSession.Send(byte[] {buffer.GetHashCode()}) [IPEndPoint {RemoteAddress}]: Пакет {(result ? "" : "не")} отправлен", Logger.Type.SecureStream_Send);
+            logger.Log($"SecureSession.Send(byte[]  hash: {buffer.GetHashCode()} size: {buffer.Length}) [IPEndPoint {RemoteAddress}]: Пакет {(result ? "" : "не")} отправлен", Logger.Type.SecureStream_Send);
             return result;
         }
         public bool Send(string data)
