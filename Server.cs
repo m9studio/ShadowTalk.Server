@@ -34,13 +34,16 @@ namespace M9Studio.ShadowTalk.Server
 
         public Server(Logger logger)
         {
+            int port = 60606;
+
+
             @base = new DataBase();
             this.logger = logger;
 
 
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-            Address = new IPEndPoint(IPAddress.Any, 60606);
+            Address = new IPEndPoint(IPAddress.Any, port);
 
             socket.Bind(Address);
             socket.Listen(10);
@@ -54,7 +57,7 @@ namespace M9Studio.ShadowTalk.Server
             sessions = new Dictionary<int, SecureSessionLogger>();
             users = new Dictionary<int, User>();
 
-            logger.UpdateAddress(allIP(55555));
+            logger.UpdateAddress(allIP(port));
             Update();
 
             manager.OnConnected += session => Connect(new SecureSessionLogger(session, logger));

@@ -140,7 +140,10 @@ namespace M9Studio.ShadowTalk.Server
         private void ConnectP2P(SecureSessionLogger session, User user, PacketClientToServerConnectP2P packet)
         {
             if (!sessions.ContainsKey(packet.UserId)){
-                session.Send(new PacketServerToClientErrorP2P());
+                session.Send(new PacketServerToClientErrorP2P()
+                {
+                    Id = packet.UserId,
+                });
             }
             else
             {

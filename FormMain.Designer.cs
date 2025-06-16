@@ -36,6 +36,7 @@
             labelUser = new Label();
             labelAddress = new Label();
             listBoxLog = new ListBox();
+            button1 = new Button();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
@@ -50,6 +51,7 @@
             // 
             // splitContainer1.Panel1
             // 
+            splitContainer1.Panel1.Controls.Add(button1);
             splitContainer1.Panel1.Controls.Add(labelMessageDeleted);
             splitContainer1.Panel1.Controls.Add(labelMessageWaiting);
             splitContainer1.Panel1.Controls.Add(labelMessage);
@@ -129,6 +131,16 @@
             listBoxLog.Size = new Size(544, 450);
             listBoxLog.TabIndex = 0;
             // 
+            // button1
+            // 
+            button1.Location = new Point(12, 92);
+            button1.Name = "button1";
+            button1.Size = new Size(119, 23);
+            button1.TabIndex = 12;
+            button1.Text = "Отчистить логи";
+            button1.UseVisualStyleBackColor = true;
+            button1.Click += button1_Click;
+            // 
             // FormMain
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -155,5 +167,6 @@
         private Label labelUser;
         private Label labelAddress;
         private ListBox listBoxLog;
+        private Button button1;
     }
 }

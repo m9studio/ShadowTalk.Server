@@ -25,6 +25,9 @@ namespace M9Studio.ShadowTalk.Server
 
         }
 
-
+        private void button1_Click(object sender, EventArgs e)
+        {
+            listBoxLog.Items.Clear();
+        }
     }
 }
