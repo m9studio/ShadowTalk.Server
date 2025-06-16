@@ -17,7 +17,7 @@ namespace M9Studio.ShadowTalk.Server
             return BitConverter.ToString(buffer).Replace("-", "").ToLower();
         }
 
-        protected DataBase @base;
+        public DataBase @base;
         protected Logger logger;
 
         public readonly IPEndPoint Address;
@@ -71,7 +71,7 @@ namespace M9Studio.ShadowTalk.Server
 
         }
 
-        protected void Update()
+        public void Update()
         {
             Task.Run(() =>
             {

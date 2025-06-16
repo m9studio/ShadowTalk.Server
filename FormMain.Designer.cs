@@ -31,6 +31,7 @@ namespace M9Studio.ShadowTalk.Server
         private void InitializeComponent()
         {
             splitContainer1 = new SplitContainer();
+            button1 = new Button();
             labelMessageDeleted = new Label();
             labelMessageWaiting = new Label();
             labelMessage = new Label();
@@ -38,7 +39,7 @@ namespace M9Studio.ShadowTalk.Server
             labelUser = new Label();
             labelAddress = new Label();
             listBoxLog = new ListBox();
-            button1 = new Button();
+            button2 = new Button();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
@@ -53,6 +54,7 @@ namespace M9Studio.ShadowTalk.Server
             // 
             // splitContainer1.Panel1
             // 
+            splitContainer1.Panel1.Controls.Add(button2);
             splitContainer1.Panel1.Controls.Add(button1);
             splitContainer1.Panel1.Controls.Add(labelMessageDeleted);
             splitContainer1.Panel1.Controls.Add(labelMessageWaiting);
@@ -67,6 +69,16 @@ namespace M9Studio.ShadowTalk.Server
             splitContainer1.Size = new Size(821, 450);
             splitContainer1.SplitterDistance = 273;
             splitContainer1.TabIndex = 0;
+            // 
+            // button1
+            // 
+            button1.Location = new Point(12, 92);
+            button1.Name = "button1";
+            button1.Size = new Size(148, 23);
+            button1.TabIndex = 12;
+            button1.Text = "Отчистить логи";
+            button1.UseVisualStyleBackColor = true;
+            button1.Click += button1_Click;
             // 
             // labelMessageDeleted
             // 
@@ -116,7 +128,7 @@ namespace M9Studio.ShadowTalk.Server
             // labelAddress
             // 
             labelAddress.AutoSize = true;
-            labelAddress.Location = new Point(13, 118);
+            labelAddress.Location = new Point(12, 151);
             labelAddress.Name = "labelAddress";
             labelAddress.Size = new Size(74, 15);
             labelAddress.TabIndex = 6;
@@ -134,15 +146,15 @@ namespace M9Studio.ShadowTalk.Server
             listBoxLog.TabIndex = 0;
             listBoxLog.DoubleClick += listBox1_DoubleClick;
             // 
-            // button1
+            // button2
             // 
-            button1.Location = new Point(12, 92);
-            button1.Name = "button1";
-            button1.Size = new Size(119, 23);
-            button1.TabIndex = 12;
-            button1.Text = "Отчистить логи";
-            button1.UseVisualStyleBackColor = true;
-            button1.Click += button1_Click;
+            button2.Location = new Point(12, 121);
+            button2.Name = "button2";
+            button2.Size = new Size(148, 23);
+            button2.TabIndex = 13;
+            button2.Text = "Новый пользователь";
+            button2.UseVisualStyleBackColor = true;
+            button2.Click += button2_Click;
             // 
             // FormMain
             // 
@@ -171,5 +183,6 @@ namespace M9Studio.ShadowTalk.Server
         private Label labelAddress;
         private ListBox listBoxLog;
         private Button button1;
+        private Button button2;
     }
 }
