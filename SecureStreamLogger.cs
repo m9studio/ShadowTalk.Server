@@ -1,6 +1,8 @@
 ﻿using M9Studio.SecureStream;
 using M9Studio.ShadowTalk.Core;
+using Org.BouncyCastle.Utilities;
 using System.Net;
+using System.Text;
 
 namespace M9Studio.ShadowTalk.Server
 {
@@ -40,14 +42,18 @@ namespace M9Studio.ShadowTalk.Server
                 logger.Log($"SecureStream.ReceiveFrom(IPEndPoint {address}): Ошибка при получении: {ex.Message}", Logger.Type.SecureStream_Receive);
                 throw new Exception(ex.Message);
             }
-            logger.Log($"SecureStream.ReceiveFrom(IPEndPoint {address}): Получен зашифрованный пакет (hash: {buffer.GetHashCode()} size: {buffer.Length})", Logger.Type.SecureStream_Receive);
+            logger.Log($"SecureStream.ReceiveFrom(IPEndPoint {address}): Получен зашифрованный пакет (hash: {buffer.GetHashCode()} size: {buffer.Length})    UTF8[{Encoding.UTF8.GetString(buffer)}]    Hex[{BytesToHex(buffer)}]", Logger.Type.SecureStream_Receive);
             return buffer;
         }
 
+        public static string BytesToHex(byte[] bytes)
+        {
+            return BitConverter.ToString(bytes).Replace("-", "").ToLowerInvariant();
+        }
         public bool SendTo(byte[] buffer, IPEndPoint address)
         {
             bool result;
-            logger.Log($"SecureStream.SendTo(byte[] hash: {buffer.GetHashCode()} size: {buffer.Length}, IPEndPoint {address}): Пытаемся отправить зашифрованный пакет", Logger.Type.SecureStream_Send);
+            logger.Log($"SecureStream.SendTo(byte[] hash: {buffer.GetHashCode()} size: {buffer.Length}, IPEndPoint {address}): Пытаемся отправить зашифрованный пакет    UTF8[{Encoding.UTF8.GetString(buffer)}]    Hex[{BytesToHex(buffer)}]", Logger.Type.SecureStream_Send);
             try
             {
                 result = adapter.SendTo(buffer, address);

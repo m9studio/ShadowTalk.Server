@@ -1,4 +1,6 @@
-﻿namespace M9Studio.ShadowTalk.Server
+﻿using System.Windows.Forms;
+
+namespace M9Studio.ShadowTalk.Server
 {
     partial class FormMain
     {
@@ -130,6 +132,7 @@
             listBoxLog.Name = "listBoxLog";
             listBoxLog.Size = new Size(544, 450);
             listBoxLog.TabIndex = 0;
+            listBoxLog.DoubleClick += listBox1_DoubleClick;
             // 
             // button1
             // 

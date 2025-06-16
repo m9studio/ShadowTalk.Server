@@ -1,3 +1,5 @@
+using System.Windows.Forms;
+
 namespace M9Studio.ShadowTalk.Server
 {
     public partial class FormMain : Form
@@ -29,5 +31,33 @@ namespace M9Studio.ShadowTalk.Server
         {
             listBoxLog.Items.Clear();
         }
+
+
+
+
+        private void listBox1_DoubleClick(object sender, EventArgs e)
+        {
+            if (listBoxLog.SelectedItem != null)
+            {
+                string fullText = listBoxLog.SelectedItem.ToString();
+
+                // —оздаем и показываем новое окно
+                Form detailForm = new Form();
+                detailForm.Text = "ѕолный текст";
+
+                TextBox textBox = new TextBox();
+                textBox.Multiline = true;
+                textBox.ReadOnly = true;
+                textBox.Text = fullText;
+                textBox.Dock = DockStyle.Fill;
+                textBox.ScrollBars = ScrollBars.Vertical;
+
+                detailForm.Controls.Add(textBox);
+                detailForm.Size = new Size(400, 300);
+                detailForm.StartPosition = FormStartPosition.CenterParent;
+                detailForm.Show(); // или Show(), если не нужно блокировать основное окно
+            }
+        }
+
     }
 }

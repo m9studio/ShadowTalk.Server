@@ -34,7 +34,11 @@ namespace M9Studio.ShadowTalk.Server
 
         public Server(Logger logger)
         {
-            int port = 60606;
+            if (!File.Exists("port.txt"))
+            {
+                File.WriteAllText("port.txt", "60606");
+            }
+            int port = Convert.ToInt32(File.ReadAllText("port.txt"));
 
 
             @base = new DataBase();

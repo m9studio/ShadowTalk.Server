@@ -75,13 +75,14 @@ namespace M9Studio.ShadowTalk.Server
 
 
             List<Message> me = @base.Messages("SELECT * FROM messages WHERE recipient = ? AND type = ?", user.Id, (int)PacketServerToClientStatusMessages.CheckType.AWAITING);
-            @base.Send("UPDATE messages SET type = ? WHERE sender = ? AND type = ?", (int)PacketServerToClientStatusMessages.CheckType.VIEWED, user.Id, (int)PacketServerToClientStatusMessages.CheckType.AWAITING);
+            @base.Send("UPDATE messages SET type = ? WHERE recipient = ? AND type = ?", (int)PacketServerToClientStatusMessages.CheckType.VIEWED, user.Id, (int)PacketServerToClientStatusMessages.CheckType.AWAITING);
 
             List<Message> status = @base.Messages("SELECT * FROM messages WHERE sender = ?", user.Id);
             @base.Send("DELETE FROM messages WHERE sender = ? AND type != ?", user.Id, (int)PacketServerToClientStatusMessages.CheckType.AWAITING);
 
             PacketServerToClientSendMessages packetMe = new PacketServerToClientSendMessages()
             {
+                Dates = me.Select(m => m.Date).ToArray(),
                 Users = me.Select(x => x.Sender).ToArray(),
                 UUIDs = me.Select(x => x.UUID).ToArray(),
                 Texts = me.Select(x => x.Text).ToArray()
